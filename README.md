@@ -110,10 +110,10 @@ manual migration step is needed.
 
 The seed script creates a single reviewer account:
 
-| Field    | Value                     |
-|----------|---------------------------|
-| Email    | `reviewer@101digital.io`  |
-| Password | `Password123`             |
+| Field    | Value               |
+|----------|---------------------|
+| Email    | `admin@gmail.com`   |
+| Password | `Password123`       |
 
 These come from `SEED_USER_EMAIL` / `SEED_USER_PASSWORD` and can be overridden before seeding
 (see the next section). You can also register a brand-new account from the **Sign up** link on
@@ -136,11 +136,11 @@ docker compose exec backend npm run seed
 The reviewer account is configurable through environment variables (set them in `.env` before
 running the seed):
 
-| Variable             | Default                  | Purpose                  |
-|----------------------|--------------------------|--------------------------|
-| `SEED_USER_EMAIL`    | `reviewer@101digital.io` | Seed login email         |
-| `SEED_USER_PASSWORD` | `Password123`            | Seed login password      |
-| `SEED_USER_FULLNAME` | `Reviewer`               | Seed display name        |
+| Variable             | Default            | Purpose                  |
+|----------------------|--------------------|--------------------------|
+| `SEED_USER_EMAIL`    | `admin@gmail.com`  | Seed login email         |
+| `SEED_USER_PASSWORD` | `Password123`      | Seed login password      |
+| `SEED_USER_FULLNAME` | `Admin`            | Seed display name        |
 
 ## Testing
 

@@ -20,9 +20,9 @@ async function run() {
   await invoices.createQueryBuilder().delete().execute();
   await users.createQueryBuilder().delete().execute();
 
-  const email = process.env.SEED_USER_EMAIL ?? 'reviewer@101digital.io';
+  const email = process.env.SEED_USER_EMAIL ?? 'admin@gmail.com';
   const password = process.env.SEED_USER_PASSWORD ?? 'Password123';
-  const fullname = process.env.SEED_USER_FULLNAME ?? 'Reviewer';
+  const fullname = process.env.SEED_USER_FULLNAME ?? 'Admin';
 
   const user = await users.save(
     users.create({

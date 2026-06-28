@@ -32,9 +32,9 @@ services:
       DB_NAME: ${DB_NAME:-simple_invoice}
       JWT_SECRET: ${JWT_SECRET:-please-change-this-secret}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-3600}
-      SEED_USER_EMAIL: ${SEED_USER_EMAIL:-reviewer@101digital.io}
+      SEED_USER_EMAIL: ${SEED_USER_EMAIL:-admin@gmail.com}
       SEED_USER_PASSWORD: ${SEED_USER_PASSWORD:-Password123}
-      SEED_USER_FULLNAME: ${SEED_USER_FULLNAME:-Reviewer}
+      SEED_USER_FULLNAME: ${SEED_USER_FULLNAME:-Admin}
     ports:
       - '${BACKEND_PORT:-3000}:3000'
 

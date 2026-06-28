@@ -59,12 +59,12 @@ describe('LoginPage', () => {
     loginMock.mockResolvedValueOnce(undefined);
     renderPage();
 
-    await userEvent.type(screen.getByLabelText(/email/i), 'reviewer@101digital.io');
+    await userEvent.type(screen.getByLabelText(/email/i), 'admin@gmail.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'Password123');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     await waitFor(() =>
-      expect(loginMock).toHaveBeenCalledWith('reviewer@101digital.io', 'Password123'),
+      expect(loginMock).toHaveBeenCalledWith('admin@gmail.com', 'Password123'),
     );
     expect(navigateMock).toHaveBeenCalledWith('/', { replace: true });
   });

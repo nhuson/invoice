@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Alert, Input, Select, Space, Table, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import type { ColumnsType, TableProps } from 'antd/es/table';
+import type { SortOrder } from 'antd/es/table/interface';
 import { listInvoices } from '../api/invoices';
 import { extractErrorMessage } from '../api/client';
 import { Invoice, InvoiceQuery, InvoiceStatus } from '../types/invoice';
@@ -16,16 +17,10 @@ const STATUS_OPTIONS = [
   { value: 'Overdue', label: 'Overdue' },
 ];
 
-const SORT_OPTIONS = [
-  { value: 'invoiceDate', label: 'Sort: Invoice date' },
-  { value: 'dueDate', label: 'Sort: Due date' },
-  { value: 'totalAmount', label: 'Sort: Total amount' },
-];
+type SortField = InvoiceQuery['sortBy'];
 
-const ORDER_OPTIONS = [
-  { value: 'DESC', label: 'Descending' },
-  { value: 'ASC', label: 'Ascending' },
-];
+const toAntdOrder = (ordering: InvoiceQuery['ordering']): SortOrder =>
+  ordering === 'ASC' ? 'ascend' : 'descend';
 
 export function InvoiceListPage() {
   const navigate = useNavigate();
@@ -66,8 +61,11 @@ export function InvoiceListPage() {
     };
   }, [query]);
 
-  const update = (patch: Partial<InvoiceQuery>) =>
-    setQuery((q) => ({ ...q, page: 1, ...patch }));
+  const sortable = (field: SortField) => ({
+    sorter: true,
+    sortDirections: ['descend', 'ascend'] as SortOrder[],
+    sortOrder: query.sortBy === field ? toAntdOrder(query.ordering) : null,
+  });
 
   const columns: ColumnsType<Invoice> = [
     { title: 'Invoice #', dataIndex: 'invoiceNumber', key: 'invoiceNumber' },
@@ -77,12 +75,14 @@ export function InvoiceListPage() {
       dataIndex: 'invoiceDate',
       key: 'invoiceDate',
       render: (value: string) => formatDate(value),
+      ...sortable('invoiceDate'),
     },
     {
       title: 'Due date',
       dataIndex: 'dueDate',
       key: 'dueDate',
       render: (value: string) => formatDate(value),
+      ...sortable('dueDate'),
     },
     {
       title: 'Total',
@@ -90,6 +90,7 @@ export function InvoiceListPage() {
       key: 'totalAmount',
       align: 'right',
       render: (value: number, row) => formatMoney(value, row.currencySymbol),
+      ...sortable('totalAmount'),
     },
     {
       title: 'Status',
@@ -98,6 +99,25 @@ export function InvoiceListPage() {
       render: (value: InvoiceStatus) => <StatusBadge status={value} />,
     },
   ];
+
+  const handleTableChange: TableProps<Invoice>['onChange'] = (
+    pagination,
+    _filters,
+    sorter,
+  ) => {
+    const next = Array.isArray(sorter) ? sorter[0] : sorter;
+    const sortBy = next?.order ? (next.columnKey as SortField) : 'invoiceDate';
+    const ordering: InvoiceQuery['ordering'] = next?.order === 'ascend' ? 'ASC' : 'DESC';
+    const sortChanged = sortBy !== query.sortBy || ordering !== query.ordering;
+
+    setQuery((q) => ({
+      ...q,
+      sortBy,
+      ordering,
+      page: sortChanged ? 1 : pagination.current ?? q.page,
+      pageSize: pagination.pageSize ?? q.pageSize,
+    }));
+  };
 
   return (
     <section className="list-page">
@@ -120,20 +140,12 @@ export function InvoiceListPage() {
           options={STATUS_OPTIONS}
           style={{ width: 160 }}
           onChange={(value) =>
-            update({ status: (value || undefined) as InvoiceStatus | undefined })
+            setQuery((q) => ({
+              ...q,
+              page: 1,
+              status: (value || undefined) as InvoiceStatus | undefined,
+            }))
           }
-        />
-        <Select
-          value={query.sortBy}
-          options={SORT_OPTIONS}
-          style={{ width: 190 }}
-          onChange={(value) => update({ sortBy: value as InvoiceQuery['sortBy'] })}
-        />
-        <Select
-          value={query.ordering}
-          options={ORDER_OPTIONS}
-          style={{ width: 150 }}
-          onChange={(value) => update({ ordering: value as 'ASC' | 'DESC' })}
         />
       </Space>
 
@@ -146,6 +158,7 @@ export function InvoiceListPage() {
         columns={columns}
         dataSource={invoices}
         loading={loading}
+        onChange={handleTableChange}
         onRow={(record) => ({
           onClick: () => navigate(`/invoices/${record.invoiceId}`),
           style: { cursor: 'pointer' },
@@ -157,8 +170,6 @@ export function InvoiceListPage() {
           showSizeChanger: true,
           pageSizeOptions: ['10', '20', '50'],
           showTotal: (count, range) => `${range[0]}–${range[1]} of ${count}`,
-          onChange: (page, pageSize) =>
-            setQuery((q) => ({ ...q, page, pageSize })),
         }}
       />
     </section>
